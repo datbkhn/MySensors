@@ -19,23 +19,23 @@
 
 // Force init to be called *first*, i.e. before static object allocation.
 // Otherwise, statically allocated objects that need libmaple may fail.
-__attribute__(( constructor (101))) void premain()
-{
-	init();
-}
+//__attribute__(( constructor (101))) void premain()
+//{
+//	init();
+//}
 
 // Initialize library and handle sketch functions like we want to
-int main(void)
-{
-	_begin(); // Startup MySensors library
-	for(;;) {
-		_process();	// Process incoming data
-		if (loop) {	 // Call sketch loop
-			loop();
-		}
-		if (serialEventRun) {
-			serialEventRun();
-		}
-	}
-	return 0;
-}
+//int main(void)
+//{
+//	_begin(); // Startup MySensors library
+//	for(;;) {
+//		_process();	// Process incoming data
+//		if (loop) {	 // Call sketch loop
+//			loop();
+//		}
+//		if (serialEventRun) {
+//			serialEventRun();
+//		}
+//	}
+//	return 0;
+//}
