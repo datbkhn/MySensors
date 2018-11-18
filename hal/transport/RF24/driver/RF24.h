@@ -77,12 +77,17 @@
 #define DEFAULT_RF24_CE_PIN				(PB0)	//!< DEFAULT_RF24_CE_PIN
 #elif defined(TEENSYDUINO)
 #define DEFAULT_RF24_CE_PIN				(9)		//!< DEFAULT_RF24_CE_PIN
+#elseif defined(STM32F1xx)
+#define DEFAULT_RF24_CE_PIN				(PB11)	//!< DEFAULT_RF24_CE_PIN
 #else
 #define DEFAULT_RF24_CE_PIN				(9)		//!< DEFAULT_RF24_CE_PIN
 #endif
 
+#if defined(ARDUINO_ARCH_STM32F1)
+#define DEFAULT_RF24_CS_PIN				(PB2)
+#else
 #define DEFAULT_RF24_CS_PIN				(SS)	//!< DEFAULT_RF24_CS_PIN
-
+#endif
 
 #define LOCAL static		//!< static
 
