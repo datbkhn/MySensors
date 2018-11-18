@@ -240,8 +240,8 @@ MY_DEFAULT_RX_LED_PIN in your sketch instead to enable LEDs
 #include "drivers/Linux/EthernetServer.h"
 #include "drivers/Linux/IPAddress.h"
 #include "core/MyGatewayTransportEthernet.cpp"
-#elif defined(MY_GATEWAY_W5100)
-// GATEWAY - W5100
+#elif defined(MY_GATEWAY_W5100) || defined(MY_GATEWAY_W5500)
+// GATEWAY - W5100/W5500
 #include "core/MyGatewayTransportEthernet.cpp"
 #elif defined(MY_GATEWAY_ENC28J60)
 // GATEWAY - ENC28J60

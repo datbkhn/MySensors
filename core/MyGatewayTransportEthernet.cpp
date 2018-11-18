@@ -123,28 +123,28 @@ static inputBuffer inputString;
 void gatewayTransportRenewIP();
 #endif
 
-// On W5100 boards with SPI_EN exposed we can use the real SPI bus together with radio
+// On W5x00 boards with SPI_EN exposed we can use the real SPI bus together with radio
 // (if we enable it during usage)
-#if defined(MY_W5100_SPI_EN)
-void _w5100_spi_en(bool enable)
+#if defined(MY_W5X00_SPI_EN)
+void _w5x00_spi_en(bool enable)
 {
 	if (enable) {
 		// Pull up pin
-		hwPinMode(MY_W5100_SPI_EN, INPUT);
-		hwDigitalWrite(MY_W5100_SPI_EN, HIGH);
+		hwPinMode(MY_W5X00_SPI_EN, INPUT);
+		hwDigitalWrite(MY_W5X00_SPI_EN, HIGH);
 	} else {
 		// Ground pin
-		hwPinMode(MY_W5100_SPI_EN, OUTPUT);
-		hwDigitalWrite(MY_W5100_SPI_EN, LOW);
+		hwPinMode(MY_W5X00_SPI_EN, OUTPUT);
+		hwDigitalWrite(MY_W5X00_SPI_EN, LOW);
 	}
 }
 #else
-#define _w5100_spi_en(x)
+#define _w5x00_spi_en(x)
 #endif
 
 bool gatewayTransportInit(void)
 {
-	_w5100_spi_en(true);
+	_w5x00_spi_en(true);
 
 #if defined(MY_GATEWAY_ESP8266) || defined(MY_GATEWAY_ESP32)
 #if defined(MY_WIFI_SSID)
@@ -179,7 +179,7 @@ bool gatewayTransportInit(void)
 	// Get IP address from DHCP
 	if (!Ethernet.begin(_ethernetGatewayMAC)) {
 		GATEWAY_DEBUG(PSTR("!GWT:TIN:DHCP FAIL\n"));
-		_w5100_spi_en(false);
+		_w5x00_spi_en(false);
 		return false;
 	}
 #endif /* End of MY_IP_GATEWAY_ADDRESS && MY_IP_SUBNET_ADDRESS */
@@ -203,9 +203,9 @@ bool gatewayTransportInit(void)
 	if (client.connect(_ethernetControllerIP, MY_PORT)) {
 #endif /* End of MY_CONTROLLER_URL_ADDRESS */
 		GATEWAY_DEBUG(PSTR("GWT:TIN:ETH OK\n"));
-		_w5100_spi_en(false);
+		_w5x00_spi_en(false);
 		gatewayTransportSend(buildGw(_msgTmp, I_GATEWAY_READY).set(MSG_GW_STARTUP_COMPLETE));
-		_w5100_spi_en(true);
+		_w5x00_spi_en(true);
 		presentNode();
 	} else {
 		client.stop();
@@ -221,7 +221,7 @@ bool gatewayTransportInit(void)
 #endif /* End of MY_GATEWAY_LINUX && MY_IP_ADDRESS */
 #endif /* End of MY_GATEWAY_CLIENT_MODE */
 
-	_w5100_spi_en(false);
+	_w5x00_spi_en(false);
 	return true;
 }
 
@@ -232,7 +232,7 @@ bool gatewayTransportSend(MyMessage &message)
 
 	setIndication(INDICATION_GW_TX);
 
-	_w5100_spi_en(true);
+	_w5x00_spi_en(true);
 #if defined(MY_GATEWAY_CLIENT_MODE)
 #if defined(MY_USE_UDP)
 #if defined(MY_CONTROLLER_URL_ADDRESS)
@@ -252,14 +252,14 @@ bool gatewayTransportSend(MyMessage &message)
 		if (client.connect(_ethernetControllerIP, MY_PORT)) {
 #endif /* End of MY_CONTROLLER_URL_ADDRESS */
 			GATEWAY_DEBUG(PSTR("GWT:TPS:ETH OK\n"));
-			_w5100_spi_en(false);
+			_w5x00_spi_en(false);
 			gatewayTransportSend(buildGw(_msgTmp, I_GATEWAY_READY).set(MSG_GW_STARTUP_COMPLETE));
-			_w5100_spi_en(true);
+			_w5x00_spi_en(true);
 			presentNode();
 		} else {
 			// connecting to the server failed!
 			GATEWAY_DEBUG(PSTR("!GWT:TPS:ETH FAIL\n"));
-			_w5100_spi_en(false);
+			_w5x00_spi_en(false);
 			return false;
 		}
 	}
@@ -277,7 +277,7 @@ bool gatewayTransportSend(MyMessage &message)
 	nbytes = _ethernetServer.write(_ethernetMsg);
 #endif /* End of MY_GATEWAY_ESP8266 */
 #endif /* End of MY_GATEWAY_CLIENT_MODE */
-	_w5100_spi_en(false);
+	_w5x00_spi_en(false);
 	return (nbytes > 0);
 }
 
@@ -349,8 +349,8 @@ bool _readFromClient(void)
 
 bool gatewayTransportAvailable(void)
 {
-	_w5100_spi_en(true);
-#if !defined(MY_IP_ADDRESS) && defined(MY_GATEWAY_W5100)
+	_w5x00_spi_en(true);
+#if !defined(MY_IP_ADDRESS) && (defined(MY_GATEWAY_W5100) || defined(MY_GATEWAY_W5500))
 	// renew IP address using DHCP
 	gatewayTransportRenewIP();
 #endif
@@ -364,7 +364,7 @@ bool gatewayTransportAvailable(void)
 		_ethernetServer.read(inputString.string, MY_GATEWAY_MAX_RECEIVE_LENGTH);
 		inputString.string[packet_size] = 0;
 		GATEWAY_DEBUG(PSTR("GWT:TSA:UDP MSG=%s\n"), inputString.string);
-		_w5100_spi_en(false);
+		_w5x00_spi_en(false);
 		const bool ok = protocolParse(_ethernetMsg, inputString.string);
 		if (ok) {
 			setIndication(INDICATION_GW_RX);
@@ -380,19 +380,19 @@ bool gatewayTransportAvailable(void)
 		if (client.connect(_ethernetControllerIP, MY_PORT)) {
 #endif /* End of MY_CONTROLLER_URL_ADDRESS */
 			GATEWAY_DEBUG(PSTR("GWT:TSA:ETH OK\n"));
-			_w5100_spi_en(false);
+			_w5x00_spi_en(false);
 			gatewayTransportSend(buildGw(_msgTmp, I_GATEWAY_READY).set(MSG_GW_STARTUP_COMPLETE));
-			_w5100_spi_en(true);
+			_w5x00_spi_en(true);
 			presentNode();
 		} else {
 			GATEWAY_DEBUG(PSTR("!GWT:TSA:ETH FAIL\n"));
-			_w5100_spi_en(false);
+			_w5x00_spi_en(false);
 			return false;
 		}
 	}
 	if (_readFromClient()) {
 		setIndication(INDICATION_GW_RX);
-		_w5100_spi_en(false);
+		_w5x00_spi_en(false);
 		return true;
 	}
 #endif /* End of MY_USE_UDP */
@@ -431,7 +431,7 @@ bool gatewayTransportAvailable(void)
 	for (uint8_t i = 0; i < ARRAY_SIZE(clients); i++) {
 		if (_readFromClient(i)) {
 			setIndication(INDICATION_GW_RX);
-			_w5100_spi_en(false);
+			_w5x00_spi_en(false);
 			return true;
 		}
 	}
@@ -444,9 +444,9 @@ bool gatewayTransportAvailable(void)
 			client.stop();
 			client = newclient;
 			GATEWAY_DEBUG(PSTR("GWT:TSA:ETH OK\n"));
-			_w5100_spi_en(false);
+			_w5x00_spi_en(false);
 			gatewayTransportSend(buildGw(_msgTmp, I_GATEWAY_READY).set(MSG_GW_STARTUP_COMPLETE));
-			_w5100_spi_en(true);
+			_w5x00_spi_en(true);
 			presentNode();
 		}
 	}
@@ -457,14 +457,14 @@ bool gatewayTransportAvailable(void)
 		} else {
 			if (_readFromClient()) {
 				setIndication(INDICATION_GW_RX);
-				_w5100_spi_en(false);
+				_w5x00_spi_en(false);
 				return true;
 			}
 		}
 	}
 #endif /* End of MY_GATEWAY_ESP8266 || MY_GATEWAY_LINUX */
 #endif /* End of MY_GATEWAY_CLIENT_MODE */
-	_w5100_spi_en(false);
+	_w5x00_spi_en(false);
 	return false;
 }
 

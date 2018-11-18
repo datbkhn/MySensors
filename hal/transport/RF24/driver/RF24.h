@@ -62,6 +62,9 @@
 
 #include "RF24registers.h"
 
+#define USING_SPI2
+//#define MY_DEBUG_VERBOSE_RF24
+
 #if defined(ARDUINO_ARCH_AVR)
 #define DEFAULT_RF24_CE_PIN				(9)		//!< DEFAULT_RF24_CE_PIN
 #elif defined(ARDUINO_ARCH_ESP8266)
@@ -74,17 +77,23 @@
 #define DEFAULT_RF24_CE_PIN				(22)	//!< DEFAULT_RF24_CE_PIN
 //#define DEFAULT_RF24_CS_PIN			(24)	//!< DEFAULT_RF24_CS_PIN
 #elif defined(ARDUINO_ARCH_STM32F1)
+#if defined(USING_SPI2)
+#define DEFAULT_RF24_CE_PIN				(PB11)	//!< DEFAULT_RF24_CE_PIN
+#else
 #define DEFAULT_RF24_CE_PIN				(PB0)	//!< DEFAULT_RF24_CE_PIN
+#endif
 #elif defined(TEENSYDUINO)
 #define DEFAULT_RF24_CE_PIN				(9)		//!< DEFAULT_RF24_CE_PIN
-#elseif defined(STM32F1xx)
-#define DEFAULT_RF24_CE_PIN				(PB11)	//!< DEFAULT_RF24_CE_PIN
 #else
 #define DEFAULT_RF24_CE_PIN				(9)		//!< DEFAULT_RF24_CE_PIN
 #endif
 
 #if defined(ARDUINO_ARCH_STM32F1)
+#if defined(USING_SPI2)
+#define DEFAULT_RF24_CS_PIN				(PB12)
+#else
 #define DEFAULT_RF24_CS_PIN				(PB2)
+#endif
 #else
 #define DEFAULT_RF24_CS_PIN				(SS)	//!< DEFAULT_RF24_CS_PIN
 #endif
@@ -116,8 +125,14 @@ RF24_SPI;
 extern HardwareSPI SPI;		//!<  SPI
 #endif
 
+
 #if !defined(RF24_SPI)
-#define RF24_SPI SPI			//!<  SPI
+#if defined(USING_SPI2)
+SPIClass SPI_2(2); //Create an instance of the SPI Class called SPI_2 that uses the 2nd SPI Port
+#define RF24_SPI SPI_2			//!< SPI
+#else
+#define RF24_SPI SPI			//!< SPI
+#endif
 #endif
 #endif
 
